@@ -1,0 +1,64 @@
+id: query-based-rxss
+
+info:
+  name: Reflected XSS Query
+  author: kaks3c
+  severity: medium
+  tags: xss,p3
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0
+        Accept: */*
+
+    payloads:
+      payload:
+        - '<bcresearcher11>'
+        - '%3C%62%63%72%65%73%65%61%72%63%68%65%72%32%32%3E'
+        - PGJjcmVzZWFyY2hlcjMzPg== 
+        - '&#60;&#98;&#99;&#114;&#101;&#115;&#101;&#97;&#114;&#99;&#104;&#101;&#114;&#52;&#52;&#62;'
+
+    attack: batteringram
+
+    fuzzing:
+      - part: query
+        mode: single
+        type: replace
+        fuzz:
+          - "{{payload}}"
+
+    matchers-condition: or
+    stop-at-first-match: true
+    matchers:
+      - type: word
+        part: body
+        name: simple-xss
+        words:
+          - "<bcresearcher11>"
+
+      - type: word
+        part: body
+        name: urlencoding
+        words:
+          - "<bcresearcher22>"
+
+      - type: word
+        part: body
+        name: base64encoding
+        words:
+          - "<bcresearcher33>"
+
+      - type: word
+        part: body
+        name: htmlencoding
+        words:
+          - "<bcresearcher44>"
+
+    extractors:
+      - type: kval
+        part: header
+        kval:
+          - content_type
